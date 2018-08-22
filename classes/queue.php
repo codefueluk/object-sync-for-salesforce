@@ -61,7 +61,8 @@ class Object_Sync_Sf_Queue {
 			require_once plugin_dir_path( __FILE__ ) . '../vendor/autoload.php';
 			require_once plugin_dir_path( __FILE__ ) . '../classes/salesforce_queue_job.php';
 		}
-		$this->set_schedule_frequency();
+		//$this->set_schedule_frequency();
+		wp_queue()->cron( $this->attempts, 1 );
 	}
 
 	/**
@@ -72,6 +73,7 @@ class Object_Sync_Sf_Queue {
 	function default_connection( $connection ) {
 		// the default for wp-queue is database
 		$connection = get_option( 'object_sync_for_salesforce_default_connection', 'database' );
+		return 'sync'; // for testing
 		return $connection;
 	}
 
@@ -80,10 +82,8 @@ class Object_Sync_Sf_Queue {
 	 */
 	public function set_schedule_frequency( $schedules = array() ) {
 
-		wp_queue()->cron( $this->attempts, 5 );
-
 		// create an option in the core schedules array for each one the plugin defines
-		/*foreach ( $this->schedulable_classes as $key => $value ) {
+		foreach ( $this->schedulable_classes as $key => $value ) {
 			$schedule_number = absint( get_option( 'object_sync_for_salesforce_' . $key . '_schedule_number', '' ) );
 			$schedule_unit   = get_option( 'object_sync_for_salesforce_' . $key . '_schedule_unit', '' );
 
@@ -110,16 +110,23 @@ class Object_Sync_Sf_Queue {
 
 			$schedules[ $key ] = array(
 				'interval' => $seconds * $schedule_number,
+				'minutes'  => $minutes,
 				'display'  => 'Every ' . $schedule_number . ' ' . $schedule_unit,
 			);
 
 			$this->schedule_frequency = $key;
-			error_log( 'create cron that runs every ' . $minutes . ' minutes' );
-			wp_queue()->cron( $this->attempts, $minutes );
 
 		}
 
-		return $schedules;*/
+		uasort( $schedules, function( $a, $b ) {
+			return $a['interval'] - $b['interval'];
+		});
+
+		reset( $schedules );
+		$first_key = key( $schedules );
+		wp_queue()->cron( $this->attempts, $schedules[ $first_key ]['minutes'] );
+
+		return $schedules;
 	}
 
 	/**

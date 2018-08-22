@@ -194,7 +194,7 @@ class Object_Sync_Salesforce {
 	 *   Instance of Object_Sync_Sf_Queue
 	 */
 	private function queue( $version, $slug, $schedulable_classes ) {
-		if ( ! class_exists( 'Object_Sync_Sf_Queue' ) && file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
+		if ( ! class_exists( 'Object_Sync_Sf_Queue' ) ) {
 			require_once( plugin_dir_path( __FILE__ ) . 'classes/queue.php' );
 		}
 		$queue = new Object_Sync_Sf_Queue( $version, $slug, $schedulable_classes );

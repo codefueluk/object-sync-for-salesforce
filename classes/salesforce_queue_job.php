@@ -27,11 +27,11 @@ class Salesforce_Queue_Job extends Job {
 	 */
 	public function handle() {
 
+		// this method does not run unless there is a job to be handled
 		$job_processor = $this->job_processor;
 		$data          = $this->data;
 
 		// if we had namespaces, we could call back up to the queue and check the interval compared to how long it had been
-
 		if ( is_array( $job_processor['classes'][ $job_processor['schedule_name'] ] ) ) {
 			$schedule = $job_processor['classes'][ $job_processor['schedule_name'] ];
 			if ( isset( $schedule['class'] ) ) {
